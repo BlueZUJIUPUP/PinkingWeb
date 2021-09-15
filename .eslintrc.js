@@ -14,6 +14,7 @@ module.exports = {
   // add your custom rules here
   //it is base on https://github.com/vuejs/eslint-config-vue
   rules: {
+    "indent": ["off", 2],
     "vue/max-attributes-per-line": [2, {
       "singleline": 10,
       "multiline": {
@@ -107,9 +108,10 @@ module.exports = {
     'no-mixed-spaces-and-tabs': 2,
     'no-multi-spaces': 2,
     'no-multi-str': 2,
-    'no-multiple-empty-lines': [2, {
-      'max': 1
-    }],
+    'no-multiple-empty-lines':0,
+    // 'no-multiple-empty-lines': [2, {
+    //   'max': 1
+    // }],
     'no-native-reassign': 2,
     'no-negated-in-lhs': 2,
     'no-new-object': 2,
