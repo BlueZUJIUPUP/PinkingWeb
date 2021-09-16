@@ -2,7 +2,7 @@ import axios from './http'
 
 const cases = {
   getCaseList(params) {
-    return axios.get('/testcase', { params })
+    return axios.get('/testcase/', { params })
   },
   createCase(params) {
     return axios.post('/testcase/', { params })
@@ -11,7 +11,7 @@ const cases = {
     return axios.delete('/testcase', { params })
   },
   updateCase(params) {
-    return axios.put('/testcase', params)
+    return axios.put('/testcase/', params)
   }
   // createFileCase(params){
   //     return axios.post('/testCase/file',params)

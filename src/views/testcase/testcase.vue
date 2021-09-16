@@ -46,10 +46,14 @@
           <span>{{ row.author }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="优先级" width="80px">
-        12
+      <el-table-column label="优先级" class-name="priority-col" width="100" align="center">
+        <template slot-scope="{row}">
+          <el-tag :type="row.priority | priorityFilter">
+            {{ row.priority }}
+          </el-tag>
+        </template>
       </el-table-column>
-      <el-table-column label="状态" class-name="status-col" width="100">
+      <el-table-column label="状态" class-name="status-col" width="100" align="center">
         <template slot-scope="{row}">
           <el-tag :type="row.status | statusFilter">
             {{ row.status }}
@@ -58,7 +62,7 @@
       </el-table-column>
       <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
-          <el-button type="primary" size="mini" round dark @click="Edit()">
+          <el-button type="primary" size="mini" round dark @click="Editwin(row)">
             编辑
           </el-button>
           <el-button size="mini" type="danger" round da rk @click="Delete(row)">
@@ -71,15 +75,17 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
         <el-form-item label="用例名称" prop="title">
-          <el-input v-model="temp.name" />
+          <el-input v-model="temp.nodeID" />
         </el-form-item>
         <el-form-item label="优先级">
+          <el-select v-model="temp.priority" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in prioritOptions" :key="item" :label="item" :value="item" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
             <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="日期" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
@@ -104,11 +110,18 @@ export default {
   filters: {
     statusFilter(status) {
       const statusMap = {
-        published: 'success',
-        draft: 'gray',
-        deleted: 'danger'
+        '0': 'success',
+        '1': 'danger'
       }
       return statusMap[status]
+    },
+    priorityFilter(status) {
+      const priorityMap = {
+        '0': 'success',
+        '1': 'gray',
+        '2': 'danger'
+      }
+      return priorityMap[status]
     }
   },
   data() {
@@ -135,12 +148,13 @@ export default {
         id: undefined,
         importance: 1,
         remark: '',
-        timestamp: new Date(),
-        name: '',
-        type: '',
-        status: '低'
+        nodeID: '',
+        author: 'zyy',
+        priorit: '低',
+        status: '可执行'
       },
-      statusOptions: ['高', '中', '低']
+      prioritOptions: ['高', '中', '低'],
+      statusOptions: ['可执行', '不可执行']
     }
   },
   created() {
@@ -151,12 +165,30 @@ export default {
       this.listLoading = false
       this.$api.cases.getCaseList().then((res) => {
         this.list = res.data.msg.data
+        console.log(this.list)
         this.listLoading = false
       })
     },
-    Edit() {
+    Editwin(row) {
       this.dialogFormVisible = true
       this.dialogStatus = 'Edit'
+      this.temp = row
+    },
+    Edit() {
+      const data = {
+        'id': this.temp.id,
+        'nodeID': this.temp.nodeID,
+        'remark': this.temp.remark,
+        'author': this.temp.author,
+        'priority': this.temp.priority,
+        'status': this.temp.status
+      }
+      console.log(data)
+      this.$api.cases.updateCase(data).then((res) => {
+        console.log(res)
+      })
+      this.dialogFormVisible = false
+      this.fetchData()
     },
     Delete(row) {
       const data = { 'id': row.id }
@@ -172,7 +204,9 @@ export default {
       this.dialogStatus = 'Create'
       const data = {
         'nodeID': this.temp.name,
-        'remark': this.temp.remark
+        'remark': this.temp.remark,
+        'priority': this.temp.priority,
+        'status': this.temp.status
       }
       this.$api.cases.createCase(data).then((res) => {
         console.log(res)
